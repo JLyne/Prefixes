@@ -1,0 +1,33 @@
+set-success: <green><bold>Prefix > <reset><light_purple>Your prefix has been changed to <reset><prefix>
+other-set-success: <green><bold>Prefix > <reset><light_purple>The prefix of <green><player> <light_purple>has been changed to <reset><prefix>
+clear-success: <green><bold>Prefix > <reset><light_purple>Your prefix has been cleared.
+other-clear-success: <green><bold>Prefix > <reset><light_purple>The prefix of <green><player> <light_purple>has been cleared.
+reload-success: <green><bold>Prefix > <reset><light_purple>Prefixes reloaded.
+list:
+  header: <br><#54fb54>Available Prefixes <#a7a7a7>- <page>/<pages><br><#f8e068>---------------
+  item: <#fba700><hover:show_text:"Select this prefix"><click:run_command:"/prefix set <id>">[Select] <reset>    <hover:show_text:"<description>"><prefix>
+  item-selected: <#a7a7a7><italic><hover:show_text:"This is your current prefix">Selected <reset>   <hover:show_text:"<description>"><prefix>
+  item-locked: <#a7a7a7><italic><hover:show_text:"This prefix is locked">Locked      <reset><hover:show_text:"<description>"><prefix>
+  next: ' <#a7a7a7><hover:show_text:"View the next page"><click:run_command:"/prefix list <page>">[Next]'
+  prev: <#a7a7a7><hover:show_text:"View the previous page"><click:run_command:"/prefix list <page>">[Prev]
+list-bedrock:
+  item: <prefix> <reset><#fba700>Type <#f8e068>/prefix set <id><#fba700> to use
+  item-selected: <prefix> <reset><#a7a7a7><italic>This is your current prefix
+  item-locked: <#a7a7a7><italic>Locked Prefix
+  next: ' <#a7a7a7>Type /prefix list <page> to view the next page'
+errors:
+  no-prefixes: <red><bold>Prefix > <reset><yellow>There are no prefixes available.
+  no-page: <red><bold>Prefix > <reset><yellow>There is no page <page>.
+  invalid-page: <red><bold>Prefix > <reset><yellow>Invalid page number.
+  no-prefix: '<red><bold>Prefix > <reset><yellow>Please specify a prefix to set.<yellow> Type <red>/prefix<yellow> to see available prefixes.'
+  no-permission: '<red><bold>No Permission > <reset><yellow>You do not have permission to use the <red>"<prefix>" <yellow>prefix.'
+  other-no-permission: '<red><bold>No Permission > <reset><red><player> <yellow>does not have permission to use the <red>"<prefix>" <yellow>prefix.'
+  invalid-prefix: '<red><bold>Prefix > <reset><yellow>Unknown prefix <red>"<prefix>".<yellow> Type <red>/prefix<yellow> to see available prefixes.'
+  prefix-retired: <red><bold>Prefix > <reset><yellow>This prefix has been retired.
+  not-a-player: <red><bold>Prefix > <reset><yellow>You must be a player to change your prefix.
+  unknown-player: <red><bold>Prefix > <reset><yellow>No matching online player found.
+  set-failed: <red><bold>Prefix > <reset><yellow>An error occurred whilst setting your prefix.
+  other-set-failed: '<red><bold>Prefix > <reset><yellow>An error occurred whilst setting <player>''s prefix.'
+  clear-failed: <red><bold>Prefix > <reset><yellow>An error occurred whilst clearing your prefix.
+  other-clear-failed: '<red><bold>Prefix > <reset><yellow>An error occurred whilst clearing <player>''s prefix.'
+  usage: '<red><bold>Prefix > <reset><yellow>Usage: /prefix list|set|reload.'

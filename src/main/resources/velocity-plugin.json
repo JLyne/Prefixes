@@ -1,0 +1,13 @@
+{
+  "id": "prefixes",
+  "name": "Prefixes",
+  "version": "@project.version@",
+  "authors": ["Jim (AnEnragedPigeon)"],
+  "dependencies": [
+    {
+      "id": "luckperms",
+      "optional": false
+    }
+  ],
+  "main": "uk.co.notnull.prefixes.Prefixes"
+}

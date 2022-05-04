@@ -1,0 +1,102 @@
+prefixes:
+  #  prefix_id: # Id of prefix
+  #    prefix: "&ePrefix &7 |" # The actual prefix
+  #    permission: unlocked.prefix.test # Optional permission required to use prefix
+  #    unlockable: true # If true, will be shown as "locked" in the prefix list
+  #    retired: true # If true, will not be selectable or display in the list, but will persist on players already using it. Overrides unlockable
+  egg:
+    prefix: '&eegg &8| &7'
+  boat:
+    prefix: '&6boat &8| &7'
+  cubegamer:
+    prefix: '&2Cube Gamer &8| &7'
+    retired: true
+  rtgamer:
+    prefix: '&5RTGamer &8| &7'
+  bobross:
+    prefix: '&bBob Ross &8| &7'
+    retired: true
+  afraidbob:
+    prefix: '&dAfraid Bob &8| &7'
+    retired: true
+  waa:
+    prefix: '&5WAAA &8| &7'
+    retired: true
+  george:
+    prefix: '&fGeorge &8| &7'
+  virtuallego:
+    prefix: '&6Virtual Lego &8| &7'
+  pant:
+    prefix: '&9Pant &8| &7'
+  iwantdie:
+    prefix: '&8I Want Die &8| &7'
+  gamer:
+    prefix: '&cGamer &8| &7'
+  hopperenthusiast:
+    prefix: '&eHopper Enthusiast &8| &7'
+  cobblelover:
+    prefix: '&8Cobble Lover &8| &7'
+  elytraowner:
+    prefix: '&dElytra Owner &8| &7'
+  link:
+    prefix: '&b/link &8| &7'
+    retired: true
+  dioriteworshipper:
+    prefix: '&fDiorite Worshipper &8| &7'
+    retired: true
+  resetwhen:
+    prefix: '&cReset When? &8| &7'
+  1.16:
+    prefix: '&a1.16 &8| &7'
+    retired: true
+  videogames:
+    prefix: '&9VIDEO GAMES &8| &7'
+  dirthut:
+    prefix: '&6Dirt Hut &8| &7'
+  minecraft:
+    prefix: '&eMinecraft &8| &7'
+  feedus:
+    prefix: '&cFEED US &8| &7'
+    retired: true
+  sapling:
+    prefix: '&aSapling &8| &7'
+  alliswell:
+    prefix: '&9All is Well &8| &7'
+  32diamondblocks:
+    prefix: '&b32 Diamond Blocks &8| &7'
+    retired: true
+  hivelife:
+    prefix: '&aHiveLife &8| &7'
+    retired: true
+  whosrt:
+    prefix: '&6Who''s RT? &8| &7'
+  f:
+    prefix: '&cF &8| &7'
+  prefix:
+    prefix: '&dPrefix &8| &7'
+  bruh:
+    prefix: '&eBruh &8| &7'
+  door:
+    prefix: '&#6c2f0aDoor &8| &7'
+  ascended:
+    prefix: '&#53EDCFAscended &8| &7'
+    unlockable: true
+    permission: unlocked.prefix.ascended
+  dab:
+    prefix: '&aDAB &8| &7'
+    permission: unlocked.prefix.dab
+  skylounge:
+    prefix: '&bSkyLounge &8| &7'
+    permission: unlocked.prefix.skylounge
+  labyrinthsurvivor:
+    prefix: '&6Labyrinth Survivor &8| &7'
+    permission: unlocked.prefix.labyrinthsurvivor
+  puzzlesolver:
+    prefix: '&2Puzzle Solver &8| &7'
+    permission: unlocked.prefix.puzzlesolver
+  parkourgod:
+    prefix: '&3Parkour God &8| &7'
+    permission: unlocked.prefix.parkourgod
+  citycrawler:
+    prefix: '&eCity Crawler &8| &7'
+    permission: unlocked.prefix.citycrawler
