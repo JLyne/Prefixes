@@ -23,6 +23,8 @@
 
 package uk.co.notnull.prefixes;
 
+import com.velocitypowered.api.command.CommandSource;
+import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -87,6 +89,14 @@ public class Messages {
         }
 
         return miniMessage.deserialize(message, placeholders.build());
+    }
+
+    public static void sendComponent(CommandSource recipient, String messageId) {
+        recipient.sendMessage(getComponent(messageId), MessageType.SYSTEM);
+    }
+
+    public static void sendComponent(CommandSource recipient, String messageId, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
+        recipient.sendMessage(getComponent(messageId, stringReplacements, componentReplacmenets), MessageType.SYSTEM);
     }
 }
 

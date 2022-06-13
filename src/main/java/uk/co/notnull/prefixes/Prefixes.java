@@ -377,11 +377,11 @@ public class Prefixes {
 
 		if (page > pages) {
 			if (page == 1) {
-				player.sendMessage(Messages.getComponent("errors.no-prefixes"));
+				Messages.sendComponent(player, "errors.no-prefixes");
 			} else {
-				player.sendMessage(Messages.getComponent("errors.no-page",
-														 Collections.singletonMap("page", String.valueOf(page)),
-														 Collections.emptyMap()));
+				Messages.sendComponent(player, "errors.no-page",
+									   Collections.singletonMap("page", String.valueOf(page)),
+									   Collections.emptyMap());
 			}
 
 			return;

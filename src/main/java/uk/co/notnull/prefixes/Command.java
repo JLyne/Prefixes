@@ -40,7 +40,7 @@ public final class Command implements SimpleCommand {
 
 		if (args == 0) {
 			if (!(invocation.source() instanceof Player)) {
-				invocation.source().sendMessage(Messages.getComponent("errors.not-a-player"));
+				Messages.sendComponent(invocation.source(), "errors.not-a-player");
 				return;
 			}
 
@@ -53,12 +53,12 @@ public final class Command implements SimpleCommand {
 		switch (arg1) {
 			case "reload":
 				Prefixes.getInstance().reload();
-				invocation.source().sendMessage(Messages.getComponent("reload-success"));
+				Messages.sendComponent(invocation.source(), "reload-success");
 
 				return;
 			case "list":
 				if (!(invocation.source() instanceof Player)) {
-					invocation.source().sendMessage(Messages.getComponent("errors.not-a-player"));
+					Messages.sendComponent(invocation.source(), "errors.not-a-player");
 					return;
 				}
 
@@ -70,10 +70,10 @@ public final class Command implements SimpleCommand {
 						Prefixes.getInstance().sendPrefixList((Player) invocation.source(), page);
 
 						if(page < 1) {
-							invocation.source().sendMessage(Messages.getComponent("errors.invalid-page"));
+							Messages.sendComponent(invocation.source(), "errors.invalid-page");
 						}
 					} catch (NumberFormatException e) {
-						invocation.source().sendMessage(Messages.getComponent("errors.invalid-page"));
+						Messages.sendComponent(invocation.source(), "errors.invalid-page");
 					}
 				}
 
@@ -82,48 +82,44 @@ public final class Command implements SimpleCommand {
 				Player target = (Player) invocation.source();
 
 				if(args == 1) {
-					invocation.source().sendMessage(Messages.getComponent("errors.no-prefix"));
+					Messages.sendComponent(invocation.source(), "errors.no-prefix");
 					return;
 				}
 
 				Prefix prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[1]);
 
 				if (args == 2 && !(invocation.source() instanceof Player)) {
-					invocation.source().sendMessage(Messages.getComponent("errors.not-a-player"));
+					Messages.sendComponent(invocation.source(), "errors.not-a-player");
 					return;
 				}
 
 				if (prefix == null) {
-					invocation.source().sendMessage(
-							Messages.getComponent("errors.invalid-prefix",
-												  Collections.singletonMap("prefix", invocation.arguments()[1]),
-												  Collections.emptyMap()));
+					Messages.sendComponent(invocation.source(), "errors.invalid-prefix",
+										   Collections.singletonMap("prefix", invocation.arguments()[1]),
+										   Collections.emptyMap());
 					return;
 				} else if (prefix.isRetired() && !target.hasPermission("prefixes.use-retired")) {
-					invocation.source().sendMessage(
-							Messages.getComponent("errors.prefix-retired",
-												  Collections.singletonMap("prefix", invocation.arguments()[1]),
-												  Collections.emptyMap()));
+					Messages.sendComponent(invocation.source(), "errors.prefix-retired",
+										   Collections.singletonMap("prefix", invocation.arguments()[1]),
+										   Collections.emptyMap());
 					return;
 				}
 
 				if (args == 2) {
 					if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-						invocation.source().sendMessage(
-								Messages.getComponent("errors.no-permission",
-													  Collections.singletonMap("prefix", invocation.arguments()[1]),
-													  Collections.emptyMap()));
+						Messages.sendComponent(invocation.source(), "errors.no-permission",
+											   Collections.singletonMap("prefix", invocation.arguments()[1]),
+											   Collections.emptyMap());
 					} else {
 						Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-							if(success) {
-								invocation.source().sendMessage(
-								Messages.getComponent("set-success",
-													  Collections.emptyMap(),
-													  Collections.singletonMap("prefix",
-																			   Messages.legacySerializer.deserialize(
-																					   prefix.getPrefix()))));
+							if (success) {
+								Messages.sendComponent(invocation.source(), "set-success",
+													   Collections.emptyMap(),
+													   Collections.singletonMap("prefix",
+																				Messages.legacySerializer.deserialize(
+																						prefix.getPrefix())));
 							} else {
-								invocation.source().sendMessage(Messages.getComponent("set-failed"));
+								Messages.sendComponent(invocation.source(), "set-failed");
 							}
 						});
 					}
@@ -131,30 +127,27 @@ public final class Command implements SimpleCommand {
 					target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[2]).orElse(null);
 
 					if (target == null) {
-						invocation.source().sendMessage(Messages.getComponent("errors.unknown-player"));
+						Messages.sendComponent(invocation.source(), "errors.unknown-player");
 					} else if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-						invocation.source().sendMessage(
-								Messages.getComponent("errors.other-no-permission",
-													  Map.of(
-															  "player", target.getUsername(),
-															  "prefix", invocation.arguments()[0]),
-													  Collections.emptyMap()));
+						Messages.sendComponent(invocation.source(), "errors.other-no-permission",
+											   Map.of(
+													   "player", target.getUsername(),
+													   "prefix", invocation.arguments()[0]),
+											   Collections.emptyMap());
 					} else {
 						Player finalTarget = target;
 
 						Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-							if(success) {
-								invocation.source().sendMessage(
-								Messages.getComponent("other-set-success",
-													  Collections.singletonMap("player", finalTarget.getUsername()),
-													  Collections.singletonMap("prefix",
-																			   Messages.legacySerializer.deserialize(
-																					   prefix.getPrefix()))));
+							if (success) {
+								Messages.sendComponent(invocation.source(), "other-set-success",
+													   Collections.singletonMap("player", finalTarget.getUsername()),
+													   Collections.singletonMap("prefix",
+																				Messages.legacySerializer.deserialize(
+																						prefix.getPrefix())));
 							} else {
-								invocation.source().sendMessage(
-								Messages.getComponent("other-set-failed",
-													  Collections.singletonMap("player", finalTarget.getUsername()),
-													  Collections.emptyMap()));
+								Messages.sendComponent(invocation.source(), "other-set-failed",
+													   Collections.singletonMap("player", finalTarget.getUsername()),
+													   Collections.emptyMap());
 							}
 						});
 					}
@@ -166,35 +159,33 @@ public final class Command implements SimpleCommand {
 
 				if (args == 1) {
 					if(!(invocation.source() instanceof Player)) {
-						invocation.source().sendMessage(Messages.getComponent("errors.not-a-player"));
+						Messages.sendComponent(invocation.source(), "errors.not-a-player");
 						return;
 					}
 
 					Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
 						if(success) {
-							invocation.source().sendMessage(Messages.getComponent("clear-success"));
+							Messages.sendComponent(invocation.source(), "clear-success");
 						} else {
-							invocation.source().sendMessage(Messages.getComponent("clear-failed"));
+							Messages.sendComponent(invocation.source(), "clear-failed");
 						}
 					});
 				} else {
 					target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[1]).orElse(null);
 
 					if (target == null) {
-						invocation.source().sendMessage(Messages.getComponent("errors.unknown-player"));
+						Messages.sendComponent(invocation.source(), "errors.unknown-player");
 					} else {
 						Player finalTarget1 = target;
 						Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
 							if (success) {
-								invocation.source().sendMessage(
-										Messages.getComponent("other-clear-success",
-															  Collections.singletonMap("player", finalTarget1.getUsername()),
-															  Collections.emptyMap()));
+								Messages.sendComponent(invocation.source(), "other-clear-success",
+													   Collections.singletonMap("player", finalTarget1.getUsername()),
+													   Collections.emptyMap());
 							} else {
-								invocation.source().sendMessage(
-										Messages.getComponent("other-clear-failed",
-															  Collections.singletonMap("player", finalTarget1.getUsername()),
-															  Collections.emptyMap()));
+								Messages.sendComponent(invocation.source(), "other-clear-failed",
+													   Collections.singletonMap("player", finalTarget1.getUsername()),
+													   Collections.emptyMap());
 							}
 						});
 					}
