@@ -162,6 +162,6 @@ public class Prefix {
 		return Messages.getComponent(key, Map.of(
 					"id", id,
 					"description", description != null ? description : ""
-			), Collections.singletonMap("prefix", Messages.legacySerializer.deserialize(prefix)));
+			), Collections.singletonMap("prefix", Messages.miniMessage.deserialize(prefix)));
 	}
 }

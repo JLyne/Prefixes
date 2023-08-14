@@ -116,7 +116,7 @@ public final class Command implements SimpleCommand {
 								Messages.sendComponent(invocation.source(), "set-success",
 													   Collections.emptyMap(),
 													   Collections.singletonMap("prefix",
-																				Messages.legacySerializer.deserialize(
+																				Messages.miniMessage.deserialize(
 																						prefix.getPrefix())));
 							} else {
 								Messages.sendComponent(invocation.source(), "set-failed");
@@ -142,7 +142,7 @@ public final class Command implements SimpleCommand {
 								Messages.sendComponent(invocation.source(), "other-set-success",
 													   Collections.singletonMap("player", finalTarget.getUsername()),
 													   Collections.singletonMap("prefix",
-																				Messages.legacySerializer.deserialize(
+																				Messages.miniMessage.deserialize(
 																						prefix.getPrefix())));
 							} else {
 								Messages.sendComponent(invocation.source(), "other-set-failed",

@@ -24,13 +24,11 @@
 package uk.co.notnull.prefixes;
 
 import com.velocitypowered.api.command.CommandSource;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,8 +38,6 @@ import java.util.Map;
 public class Messages {
     private static ConfigurationNode messages;
     public static final MiniMessage miniMessage = MiniMessage.miniMessage();
-
-    public static final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public static void set(ConfigurationNode messages) {
         Messages.messages = messages;
@@ -92,11 +88,11 @@ public class Messages {
     }
 
     public static void sendComponent(CommandSource recipient, String messageId) {
-        recipient.sendMessage(getComponent(messageId), MessageType.SYSTEM);
+        recipient.sendMessage(getComponent(messageId));
     }
 
     public static void sendComponent(CommandSource recipient, String messageId, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
-        recipient.sendMessage(getComponent(messageId, stringReplacements, componentReplacmenets), MessageType.SYSTEM);
+        recipient.sendMessage(getComponent(messageId, stringReplacements, componentReplacmenets));
     }
 }
 
