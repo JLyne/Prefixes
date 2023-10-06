@@ -5,6 +5,18 @@ prefixes:
   #    permission: unlocked.prefix.test # Optional permission required to use prefix
   #    unlockable: true # If true, will be shown as "locked" in the prefix list
   #    retired: true # If true, will not be selectable or display in the list, but will persist on players already using it. Overrides unlockable
+  teampenguin:
+    prefix: '<colourstart>Team Penguin<colourend><white> 🐧 <dark_gray>| <gray>'
+    default-colour: aqua
+  teamcrab:
+    prefix: '<colourstart>Team Crab<colourend><white> 🦀 <dark_gray>| <gray>'
+    default-colour: orange
+  teamarmadillo:
+    prefix: '<colourstart>Team Armadillo<colourend><white>  <dark_gray>| <gray>'
+    default-colour: brown
+  mobvotebad:
+    prefix: '<colourstart>Mob Vote Bad<colourend> <dark_gray>| <gray>'
+    default-colour: red
   egg:
     prefix: '<colourstart>egg<colourend> <dark_gray>| <gray>'
     default-colour: yellow
@@ -144,7 +156,7 @@ prefixes:
     default-colour: yellow
     permission: unlocked.prefix.citycrawler
   exclusiveprefix:
-    prefix: '<#fb3e15>E<#f84c15>x<#f55916>c<#f26716>l<#ef7516>u<#ec8217>s<#e99017>i<#e69e18>v<#e2ab18>e <#dfb918>P<#dcc619>r<#d9d419>e<#d6e219>f<#d3ef1a>i<#d0fd1a>x<colourend> <dark_gray>| <gray>'
+    prefix: 'Exclusive Prefix'
     permission: unlocked.prefix.exclusiveprefix
 colours:
   red:
