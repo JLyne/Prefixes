@@ -415,7 +415,7 @@ public class Prefixes {
 				continue;
 			}
 
-			if (index > start + ITEMS_PER_PAGE) {
+			if (index >= start + ITEMS_PER_PAGE) {
 				break;
 			}
 
