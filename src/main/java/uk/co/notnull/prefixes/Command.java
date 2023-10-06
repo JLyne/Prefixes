@@ -57,139 +57,154 @@ public final class Command implements SimpleCommand {
 
 				return;
 			case "list":
-				if (!(invocation.source() instanceof Player)) {
-					Messages.sendComponent(invocation.source(), "errors.not-a-player");
-					return;
-				}
-
-				if (args == 1) {
-					Prefixes.getInstance().sendPrefixList((Player) invocation.source(), 1);
-				} else {
-					try {
-						int page = Integer.parseInt(invocation.arguments()[1]);
-						Prefixes.getInstance().sendPrefixList((Player) invocation.source(), page);
-
-						if(page < 1) {
-							Messages.sendComponent(invocation.source(), "errors.invalid-page");
-						}
-					} catch (NumberFormatException e) {
-						Messages.sendComponent(invocation.source(), "errors.invalid-page");
-					}
-				}
-
+				handleListCommand(invocation);
 				break;
 			case "set":
-				Player target = (Player) invocation.source();
-
-				if(args == 1) {
-					Messages.sendComponent(invocation.source(), "errors.no-prefix");
-					return;
-				}
-
-				Prefix prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[1]);
-
-				if (args == 2 && !(invocation.source() instanceof Player)) {
-					Messages.sendComponent(invocation.source(), "errors.not-a-player");
-					return;
-				}
-
-				if (prefix == null) {
-					Messages.sendComponent(invocation.source(), "errors.invalid-prefix",
-										   Collections.singletonMap("prefix", invocation.arguments()[1]),
-										   Collections.emptyMap());
-					return;
-				} else if (prefix.isRetired() && !target.hasPermission("prefixes.use-retired")) {
-					Messages.sendComponent(invocation.source(), "errors.prefix-retired",
-										   Collections.singletonMap("prefix", invocation.arguments()[1]),
-										   Collections.emptyMap());
-					return;
-				}
-
-				if (args == 2) {
-					if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-						Messages.sendComponent(invocation.source(), "errors.no-permission",
-											   Collections.singletonMap("prefix", invocation.arguments()[1]),
-											   Collections.emptyMap());
-					} else {
-						Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-							if (success) {
-								Messages.sendComponent(invocation.source(), "set-success",
-													   Collections.emptyMap(),
-													   Collections.singletonMap("prefix",
-																				Messages.miniMessage.deserialize(
-																						prefix.getPrefix())));
-							} else {
-								Messages.sendComponent(invocation.source(), "set-failed");
-							}
-						});
-					}
-				} else {
-					target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[2]).orElse(null);
-
-					if (target == null) {
-						Messages.sendComponent(invocation.source(), "errors.unknown-player");
-					} else if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-						Messages.sendComponent(invocation.source(), "errors.other-no-permission",
-											   Map.of(
-													   "player", target.getUsername(),
-													   "prefix", invocation.arguments()[0]),
-											   Collections.emptyMap());
-					} else {
-						Player finalTarget = target;
-
-						Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-							if (success) {
-								Messages.sendComponent(invocation.source(), "other-set-success",
-													   Collections.singletonMap("player", finalTarget.getUsername()),
-													   Collections.singletonMap("prefix",
-																				Messages.miniMessage.deserialize(
-																						prefix.getPrefix())));
-							} else {
-								Messages.sendComponent(invocation.source(), "other-set-failed",
-													   Collections.singletonMap("player", finalTarget.getUsername()),
-													   Collections.emptyMap());
-							}
-						});
-					}
-				}
-
+				handleSetCommand(invocation);
 				break;
 			case "clear":
-				target = (Player) invocation.source();
+				handleClearCommand(invocation);
+				break;
+		}
+	}
 
-				if (args == 1) {
-					if(!(invocation.source() instanceof Player)) {
-						Messages.sendComponent(invocation.source(), "errors.not-a-player");
-						return;
-					}
+	private void handleListCommand(final Invocation invocation) {
+		int args = invocation.arguments().length;
 
-					Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
-						if(success) {
-							Messages.sendComponent(invocation.source(), "clear-success");
-						} else {
-							Messages.sendComponent(invocation.source(), "clear-failed");
-						}
-					});
-				} else {
-					target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[1]).orElse(null);
+		if (!(invocation.source() instanceof Player)) {
+			Messages.sendComponent(invocation.source(), "errors.not-a-player");
+			return;
+		}
 
-					if (target == null) {
-						Messages.sendComponent(invocation.source(), "errors.unknown-player");
-					} else {
-						Player finalTarget1 = target;
-						Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
-							if (success) {
-								Messages.sendComponent(invocation.source(), "other-clear-success",
-													   Collections.singletonMap("player", finalTarget1.getUsername()),
-													   Collections.emptyMap());
-							} else {
-								Messages.sendComponent(invocation.source(), "other-clear-failed",
-													   Collections.singletonMap("player", finalTarget1.getUsername()),
-													   Collections.emptyMap());
-							}
-						});
-					}
+		if (args == 1) {
+			Prefixes.getInstance().sendPrefixList((Player) invocation.source(), 1);
+		} else {
+			try {
+				int page = Integer.parseInt(invocation.arguments()[1]);
+				Prefixes.getInstance().sendPrefixList((Player) invocation.source(), page);
+
+				if(page < 1) {
+					Messages.sendComponent(invocation.source(), "errors.invalid-page");
 				}
+			} catch (NumberFormatException e) {
+				Messages.sendComponent(invocation.source(), "errors.invalid-page");
+			}
+		}
+	}
+
+	private void handleSetCommand(final Invocation invocation) {
+		int args = invocation.arguments().length;
+		Player target = (Player) invocation.source();
+
+		if(args == 1) {
+			Messages.sendComponent(invocation.source(), "errors.no-prefix");
+			return;
+		}
+
+		Prefix prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[1]);
+
+		if (args == 2 && !(invocation.source() instanceof Player)) {
+			Messages.sendComponent(invocation.source(), "errors.not-a-player");
+			return;
+		}
+
+		if (prefix == null) {
+			Messages.sendComponent(invocation.source(), "errors.invalid-prefix",
+								   Collections.singletonMap("prefix", invocation.arguments()[1]),
+								   Collections.emptyMap());
+			return;
+		} else if (prefix.isRetired() && !target.hasPermission("prefixes.use-retired")) {
+			Messages.sendComponent(invocation.source(), "errors.prefix-retired",
+								   Collections.singletonMap("prefix", invocation.arguments()[1]),
+								   Collections.emptyMap());
+			return;
+		}
+
+		if (args == 2) {
+			if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
+				Messages.sendComponent(invocation.source(), "errors.no-permission",
+									   Collections.singletonMap("prefix", invocation.arguments()[1]),
+									   Collections.emptyMap());
+			} else {
+				Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
+					if (success) {
+						Messages.sendComponent(invocation.source(), "set-success",
+											   Collections.emptyMap(),
+											   Collections.singletonMap("prefix",
+																		Messages.miniMessage.deserialize(
+																				prefix.getPrefix())));
+					} else {
+						Messages.sendComponent(invocation.source(), "set-failed");
+					}
+				});
+			}
+		} else {
+			target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[2]).orElse(null);
+
+			if (target == null) {
+				Messages.sendComponent(invocation.source(), "errors.unknown-player");
+			} else if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
+				Messages.sendComponent(invocation.source(), "errors.other-no-permission",
+									   Map.of(
+											   "player", target.getUsername(),
+											   "prefix", invocation.arguments()[0]),
+									   Collections.emptyMap());
+			} else {
+				Player finalTarget = target;
+
+				Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
+					if (success) {
+						Messages.sendComponent(invocation.source(), "other-set-success",
+											   Collections.singletonMap("player", finalTarget.getUsername()),
+											   Collections.singletonMap("prefix",
+																		Messages.miniMessage.deserialize(
+																				prefix.getPrefix())));
+					} else {
+						Messages.sendComponent(invocation.source(), "other-set-failed",
+											   Collections.singletonMap("player", finalTarget.getUsername()),
+											   Collections.emptyMap());
+					}
+				});
+			}
+		}
+	}
+
+	private void handleClearCommand(final Invocation invocation) {
+		int args = invocation.arguments().length;
+		Player target = (Player) invocation.source();
+
+		if (args == 1) {
+			if(!(invocation.source() instanceof Player)) {
+				Messages.sendComponent(invocation.source(), "errors.not-a-player");
+				return;
+			}
+
+			Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
+				if(success) {
+					Messages.sendComponent(invocation.source(), "clear-success");
+				} else {
+					Messages.sendComponent(invocation.source(), "clear-failed");
+				}
+			});
+		} else {
+			target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[1]).orElse(null);
+
+			if (target == null) {
+				Messages.sendComponent(invocation.source(), "errors.unknown-player");
+			} else {
+				Player finalTarget1 = target;
+				Prefixes.getInstance().clearPrefix(target).thenAccept(success -> {
+					if (success) {
+						Messages.sendComponent(invocation.source(), "other-clear-success",
+											   Collections.singletonMap("player", finalTarget1.getUsername()),
+											   Collections.emptyMap());
+					} else {
+						Messages.sendComponent(invocation.source(), "other-clear-failed",
+											   Collections.singletonMap("player", finalTarget1.getUsername()),
+											   Collections.emptyMap());
+					}
+				});
+			}
 		}
 	}
 
