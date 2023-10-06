@@ -464,7 +464,16 @@ public class Prefixes {
 	 */
 	void sendPrefixList(Player player, int page) {
 		Prefix currentPrefix = currentPrefixes.compute(player.getUniqueId(), (key, value) -> value);
-		List<Prefix> prefixes = getAllowedPrefixes(player, true);
+		PrefixColour currentColour = currentColours.compute(player.getUniqueId(), (key, value) -> value);
+
+		List<Prefix> prefixes = getAllowedPrefixes(player, true).stream()
+				.filter(c -> !c.equals(currentPrefix))
+				.collect(Collectors.toList());
+
+		//Add player's currently selected prefix to top of list
+		if(currentPrefix != null) {
+			prefixes.add(0, currentPrefix);
+		}
 
 		boolean bedrock = platformDetectionEnabled && platformDetection.getPlatform(player).isBedrock();
 		int start = (page - 1) * ITEMS_PER_PAGE;
@@ -515,11 +524,13 @@ public class Prefixes {
 			}
 
 			if (prefix.hasPermission() && !player.hasPermission(prefix.getPermission())) {
-				list = list.append(prefix.getLockedListItem(bedrock)).append(Component.newline());
+				list = list.append(prefix.getLockedListItem(player.getUsername(), bedrock)).append(Component.newline());
 			} else if (prefix.equals(currentPrefix)) {
-				list = list.append(prefix.getSelectedListItem(bedrock)).append(Component.newline());
+				PrefixColour colour = currentColour != null ? currentColour : prefix.getDefaultColour();
+				list = list.append(prefix.getSelectedListItem(player.getUsername(), colour, bedrock))
+						.append(Component.newline());
 			} else {
-				list = list.append(prefix.getListItem(bedrock)).append(Component.newline());
+				list = list.append(prefix.getListItem(player.getUsername(), bedrock)).append(Component.newline());
 			}
 
 			index++;

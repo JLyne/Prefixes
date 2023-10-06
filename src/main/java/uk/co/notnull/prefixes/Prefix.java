@@ -39,13 +39,6 @@ public class Prefix {
 	private final boolean unlockable;
 	private final boolean retired;
 
-	private Component listItem;
-	private Component bedrockListItem;
-	private Component lockedItem;
-	private Component bedrockLockedItem;
-	private Component selectedItem;
-	private Component bedrockSelectedItem;
-
 	public Prefix(
 			String id, String prefix, String permission, String description, @NotNull PrefixColour defaultColour, boolean unlockable, boolean retired) {
 		this.id = id;
@@ -121,64 +114,40 @@ public class Prefix {
 				", prefix='" + prefix + '\'' +
 				", permission='" + permission + '\'' +
 				", description='" + description + '\'' +
-				", defaultColour='" + defaultColour.toString() + '\'' +
+				", defaultColour='" + defaultColour + '\'' +
 				", unlockable=" + unlockable +
 				", retired=" + retired +
 				'}';
 	}
 
-	public Component getListItem(boolean bedrock) {
+	public Component getListItem(String playerName, boolean bedrock) {
 		if(bedrock) {
-			if(bedrockListItem == null) {
-				bedrockListItem = createComponent("prefix-list-bedrock.item");
-			}
-
-			return bedrockListItem;
+			return createComponent("prefix-list-bedrock.item", playerName, getDefaultColour());
 		} else {
-			if(listItem == null) {
-				listItem = createComponent("prefix-list.item");
-			}
-
-			return listItem;
+			return createComponent("prefix-list.item", playerName, getDefaultColour());
 		}
 	}
 
-	public Component getLockedListItem(boolean bedrock) {
+	public Component getLockedListItem(String playerName, boolean bedrock) {
 		if(bedrock) {
-			if(bedrockLockedItem == null) {
-				bedrockLockedItem = createComponent("prefix-list-bedrock.item-locked");
-			}
-
-			return bedrockLockedItem;
+			return createComponent("prefix-list-bedrock.item-locked", playerName, getDefaultColour());
 		} else {
-			if(lockedItem == null) {
-				lockedItem = createComponent("prefix-list.item-locked");
-			}
-
-			return lockedItem;
+			return createComponent("prefix-list.item-locked", playerName, getDefaultColour());
 		}
 	}
 
-	public Component getSelectedListItem(boolean bedrock) {
+	public Component getSelectedListItem(String playerName, PrefixColour colour, boolean bedrock) {
 		if(bedrock) {
-			if(bedrockSelectedItem == null) {
-				bedrockSelectedItem = createComponent("prefix-list-bedrock.item-selected");
-			}
-
-			return bedrockSelectedItem;
+			return createComponent("prefix-list-bedrock.item-selected", playerName, colour);
 		} else {
-			if(selectedItem == null) {
-				selectedItem = createComponent("prefix-list.item-selected");
-			}
-
-			return selectedItem;
+			return createComponent("prefix-list.item-selected", playerName, colour);
 		}
 	}
 
-	private Component createComponent(String key) {
+	private Component createComponent(String key, String playerName, PrefixColour colour) {
 		return Messages.getComponent(key, Map.of(
 					"id", id,
 					"description", description != null ? description : ""
-			), Collections.singletonMap("preview", Messages.miniMessage.deserialize(getPrefix())));
+			), Collections.singletonMap("preview", Messages.miniMessage.deserialize(getPrefix(colour) + playerName)));
 	}
 }
