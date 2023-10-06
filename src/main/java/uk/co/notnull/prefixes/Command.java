@@ -81,10 +81,11 @@ public final class Command implements SimpleCommand {
 		} else {
 			try {
 				int page = Integer.parseInt(invocation.arguments()[1]);
-				Prefixes.getInstance().sendPrefixList((Player) invocation.source(), page);
 
 				if(page < 1) {
 					Messages.sendComponent(invocation.source(), "errors.invalid-page");
+				} else {
+					Prefixes.getInstance().sendPrefixList((Player) invocation.source(), page);
 				}
 			} catch (NumberFormatException e) {
 				Messages.sendComponent(invocation.source(), "errors.invalid-page");
