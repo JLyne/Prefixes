@@ -1,102 +1,234 @@
 prefixes:
   #  prefix_id: # Id of prefix
-  #    prefix: "&ePrefix &7 |" # The actual prefix
+  #    prefix: "<colourstart>Prefix<colourend> <dark_gray>| <gray>" # The actual prefix, <colourstart> is replaced by the player's selected colour
+  #    default-colour: The default colour to use for the prefix if a player hasn't selected one
   #    permission: unlocked.prefix.test # Optional permission required to use prefix
   #    unlockable: true # If true, will be shown as "locked" in the prefix list
   #    retired: true # If true, will not be selectable or display in the list, but will persist on players already using it. Overrides unlockable
   egg:
-    prefix: '&eegg &8| &7'
+    prefix: '<colourstart>egg<colourend> <dark_gray>| <gray>'
+    default-colour: yellow
   boat:
-    prefix: '&6boat &8| &7'
+    prefix: '<colourstart>boat<colourend> <dark_gray>| <gray>'
+    default-colour: orange
   cubegamer:
-    prefix: '&2Cube Gamer &8| &7'
-    retired: true
+    prefix: '<colourstart>Cube Gamer<colourend> <dark_gray>| <gray>'
+    default-colour: dark-green
   rtgamer:
-    prefix: '&5RTGamer &8| &7'
+    prefix: '<colourstart>RTGamer<colourend> <dark_gray>| <gray>'
+    default-colour: dark-purple
   bobross:
-    prefix: '&bBob Ross &8| &7'
-    retired: true
+    prefix: '<colourstart>Bob Ross<colourend> <dark_gray>| <gray>'
+    default-colour: aqua
   afraidbob:
-    prefix: '&dAfraid Bob &8| &7'
+    prefix: '<colourstart>Afraid Bob<colourend> <dark_gray>| <gray>'
+    default-colour: light-purple
     retired: true
   waa:
-    prefix: '&5WAAA &8| &7'
+    prefix: '<colourstart>WAAA<colourend> <dark_gray>| <gray>'
+    default-colour: dark-purple
     retired: true
   george:
-    prefix: '&fGeorge &8| &7'
+    prefix: '<colourstart>George<colourend> <dark_gray>| <gray>'
+    default-colour: white
   virtuallego:
-    prefix: '&6Virtual Lego &8| &7'
+    prefix: '<colourstart>Virtual Lego<colourend> <dark_gray>| <gray>'
+    default-colour: orange
   pant:
-    prefix: '&9Pant &8| &7'
+    prefix: '<colourstart>Pant<colourend> <dark_gray>| <gray>'
+    default-colour: blue
   iwantdie:
-    prefix: '&8I Want Die &8| &7'
+    prefix: '<colourstart>I Want Die<colourend> <dark_gray>| <gray>'
+    default-colour: dark-gray
   gamer:
-    prefix: '&cGamer &8| &7'
+    prefix: '<colourstart>Gamer<colourend> <dark_gray>| <gray>'
+    default-colour: red
   hopperenthusiast:
-    prefix: '&eHopper Enthusiast &8| &7'
+    prefix: '<colourstart>Hopper Enthusiast<colourend> <dark_gray>| <gray>'
+    default-colour: yellow
   cobblelover:
-    prefix: '&8Cobble Lover &8| &7'
+    prefix: '<colourstart>Cobble Lover<colourend> <dark_gray>| <gray>'
+    default-colour: dark-gray
   elytraowner:
-    prefix: '&dElytra Owner &8| &7'
+    prefix: '<colourstart>Elytra Owner<colourend> <dark_gray>| <gray>'
+    default-colour: light-purple
   link:
-    prefix: '&b/link &8| &7'
+    prefix: '<colourstart>/link<colourend> <dark_gray>| <gray>'
+    default-colour: aqua
     retired: true
   dioriteworshipper:
-    prefix: '&fDiorite Worshipper &8| &7'
+    prefix: '<colourstart>Diorite Worshipper<colourend> <dark_gray>| <gray>'
+    default-colour: white
     retired: true
   resetwhen:
-    prefix: '&cReset When? &8| &7'
+    prefix: '<colourstart>Reset When?<colourend> <dark_gray>| <gray>'
+    default-colour: red
   1.16:
-    prefix: '&a1.16 &8| &7'
+    prefix: '<colourstart>1.16<colourend> <dark_gray>| <gray>'
+    default-colour: green
     retired: true
   videogames:
-    prefix: '&9VIDEO GAMES &8| &7'
+    prefix: '<colourstart>VIDEO GAMES<colourend> <dark_gray>| <gray>'
+    default-colour: blue
   dirthut:
-    prefix: '&6Dirt Hut &8| &7'
+    prefix: '<colourstart>Dirt Hut<colourend> <dark_gray>| <gray>'
+    default-colour: orange
   minecraft:
-    prefix: '&eMinecraft &8| &7'
+    prefix: '<colourstart>Minecraft<colourend> <dark_gray>| <gray>'
+    default-colour: yellow
   feedus:
-    prefix: '&cFEED US &8| &7'
+    prefix: '<colourstart>FEED US<colourend> <dark_gray>| <gray>'
+    default-colour: red
     retired: true
   sapling:
-    prefix: '&aSapling &8| &7'
+    prefix: '<colourstart>Sapling<colourend> <dark_gray>| <gray>'
+    default-colour: green
   alliswell:
-    prefix: '&9All is Well &8| &7'
+    prefix: '<colourstart>All is Well<colourend> <dark_gray>| <gray>'
+    default-colour: blue
   32diamondblocks:
-    prefix: '&b32 Diamond Blocks &8| &7'
+    prefix: '<colourstart>32 Diamond Blocks<colourend> <dark_gray>| <gray>'
+    default-colour: aqua
     retired: true
   hivelife:
-    prefix: '&aHiveLife &8| &7'
-    retired: true
+    prefix: '<colourstart>HiveLife<colourend> <dark_gray>| <gray>'
+    default-colour: green
   whosrt:
-    prefix: '&6Who''s RT? &8| &7'
+    prefix: '<colourstart>Who''s RT?<colourend> <dark_gray>| <gray>'
+    default-colour: orange
   f:
-    prefix: '&cF &8| &7'
+    prefix: '<colourstart>F<colourend> <dark_gray>| <gray>'
+    default-colour: red
   prefix:
-    prefix: '&dPrefix &8| &7'
+    prefix: '<colourstart>Prefix<colourend> <dark_gray>| <gray>'
+    default-colour: light-purple
   bruh:
-    prefix: '&eBruh &8| &7'
+    prefix: '<colourstart>Bruh<colourend> <dark_gray>| <gray>'
+    default-colour: yellow
   door:
-    prefix: '&#6c2f0aDoor &8| &7'
+    prefix: '<colourstart>Door<colourend> <dark_gray>| <gray>'
+    default-colour: brown
   ascended:
-    prefix: '&#53EDCFAscended &8| &7'
+    prefix: '<colourstart>Ascended<colourend> <dark_gray>| <gray>'
+    default-colour: mint
     unlockable: true
     permission: unlocked.prefix.ascended
+  mojangstudios:
+    prefix: '<colourstart>Mojang Studios<colourend> <dark_gray>| <gray>'
+    default-colour: red
+  furry:
+    prefix: '<colourstart>Furry<colourend> <dark_gray>| <gray>'
+    default-colour: light-purple
   dab:
-    prefix: '&aDAB &8| &7'
+    prefix: '<colourstart>DAB<colourend> <dark_gray>| <gray>'
+    default-colour: green
     permission: unlocked.prefix.dab
   skylounge:
-    prefix: '&bSkyLounge &8| &7'
+    prefix: '<colourstart>SkyLounge<colourend> <dark_gray>| <gray>'
+    default-colour: aqua
     permission: unlocked.prefix.skylounge
   labyrinthsurvivor:
-    prefix: '&6Labyrinth Survivor &8| &7'
+    prefix: '<colourstart>Labyrinth Survivor<colourend> <dark_gray>| <gray>'
+    default-colour: orange
     permission: unlocked.prefix.labyrinthsurvivor
   puzzlesolver:
-    prefix: '&2Puzzle Solver &8| &7'
+    prefix: '<colourstart>Puzzle Solver<colourend> <dark_gray>| <gray>'
+    default-colour: dark-green
     permission: unlocked.prefix.puzzlesolver
   parkourgod:
-    prefix: '&3Parkour God &8| &7'
+    prefix: '<colourstart>Parkour God<colourend> <dark_gray>| <gray>'
+    default-colour: dark-aqua
     permission: unlocked.prefix.parkourgod
   citycrawler:
-    prefix: '&eCity Crawler &8| &7'
+    prefix: '<colourstart>City Crawler<colourend> <dark_gray>| <gray>'
+    default-colour: yellow
     permission: unlocked.prefix.citycrawler
+  exclusiveprefix:
+    prefix: '<#fb3e15>E<#f84c15>x<#f55916>c<#f26716>l<#ef7516>u<#ec8217>s<#e99017>i<#e69e18>v<#e2ab18>e <#dfb918>P<#dcc619>r<#d9d419>e<#d6e219>f<#d3ef1a>i<#d0fd1a>x<colourend> <dark_gray>| <gray>'
+    permission: unlocked.prefix.exclusiveprefix
+colours:
+  red:
+    start: '<#f5616c>'
+  blood-orange:
+    start: '<#fa9268>'
+  orange:
+    start: '<#f7b25c>'
+  yellow:
+    start: '<#f8ea67>'
+  olive:
+    start: '<#c3e852>'
+  green:
+    start: '<green>'
+  dark-green:
+    start: '<dark_green>'
+  aqua:
+    start: '<aqua>'
+  mint:
+    start: '<#53EDCF>'
+  dark-aqua:
+    start: '<dark_aqua>'
+  blue:
+    start: '<#6559f5>'
+  dark-purple:
+    start: '<dark_purple>'
+  light-purple:
+    start: '<#b942f5>'
+  pink:
+    start: '<#f16ef1>'
+  fuscia:
+    start: '<#ed5c91>'
+  white:
+    start: '<white>'
+  light-gray:
+    start: '<#bfbfbf>'
+  dark-gray:
+    start: '<#7d7d7d>'
+  brown:
+    start: '<#91613e>'
+
+  gradient-red:
+    start: '<gradient:#f3b4af:#ec5693>'
+    end: '</gradient>'
+  gradient-orange:
+    start: '<gradient:#f3f1ac:#eea26f>'
+    end: '</gradient>'
+  gradient-green:
+    start: '<gradient:#d5f5ad:#67be82>'
+    end: '</gradient>'
+  gradient-blue:
+    start: '<gradient:#adf5db:#79b8f4>'
+    end: '</gradient>'
+  gradient-purple:
+    start: '<gradient:#a9d4f4:#bc5fe6>'
+    end: '</gradient>'
+  gradient-pink:
+    start: '<gradient:#f8a9f6:#b469eb>'
+    end: '</gradient>'
+
+  gradient-rainbow:
+    start: '<gradient:#fd8a8a:#fccda2:#fceda2:#88ee90:#988ff6:#d68ff6>'
+    end: '</gradient>'
+  gradient-trans:
+    start: '<gradient:#a6e0f7:#fdb3d0:white:white:#fdb3d0:#a6e0f7>'
+    end: '</gradient>'
+  gradient-bi:
+    start: '<gradient:#f682bc:#e89ef6:#8b8cf6>'
+    end: '</gradient>'
+  gradient-gay:
+    start: '<gradient:#a3f0dd:#f1fbfc:#7d8bf9>'
+    end: '</gradient>'
+  gradient-lesbian:
+    start: '<gradient:#f79a78:#f7f4ef:#ef76ad>'
+    end: '</gradient>'
+  gradient-pan:
+    start: '<gradient:#f8a9cb:#fbebad:#a2d7f9>'
+    end: '</gradient>'
+  gradient-intersex:
+    start: '<gradient:#fbebad:#ca91f7:#fbebad>'
+    end: '</gradient>'
+  gradient-ace:
+    start: '<gradient:#4c494d:#89868b:#f5eef9:#d488ef>'
+    end: '</gradient>'
+  gradient-nb:
+    start: '<gradient:#fbebad:#fdfcf4:#ca91f7:#4c494d>'
+    end: '</gradient>'

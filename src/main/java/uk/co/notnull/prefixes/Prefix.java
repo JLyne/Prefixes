@@ -24,6 +24,7 @@
 package uk.co.notnull.prefixes;
 
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class Prefix {
 	private final String prefix;
 	private final String permission;
 	private final String description;
+	private final @NotNull PrefixColour defaultColour;
 	private final boolean unlockable;
 	private final boolean retired;
 
@@ -45,11 +47,12 @@ public class Prefix {
 	private Component bedrockSelectedItem;
 
 	public Prefix(
-			String id, String prefix, String permission, String description, boolean unlockable, boolean retired) {
+			String id, String prefix, String permission, String description, @NotNull PrefixColour defaultColour, boolean unlockable, boolean retired) {
 		this.id = id;
 		this.prefix = prefix;
 		this.permission = permission;
 		this.description = description;
+		this.defaultColour = defaultColour;
 		this.unlockable = unlockable;
 		this.retired = retired;
 	}
@@ -58,8 +61,18 @@ public class Prefix {
 		return id;
 	}
 
-	public String getPrefix() {
+	public String getRawPrefix() {
 		return prefix;
+	}
+
+	public String getPrefix() {
+		return prefix.replace("<colourstart>", defaultColour.getColourStart())
+				.replace("<colourend>", defaultColour.getColourEnd());
+	}
+
+	public String getPrefix(@NotNull PrefixColour colour) {
+		return prefix.replace("<colourstart>", colour.getColourStart())
+				.replace("<colourend>", colour.getColourEnd());
 	}
 
 	public boolean hasPermission() {
@@ -72,6 +85,9 @@ public class Prefix {
 
 	public String getDescription() {
 		return description;
+	}
+	public @NotNull PrefixColour getDefaultColour() {
+		return defaultColour;
 	}
 
 	public boolean isRetired() {
@@ -88,14 +104,14 @@ public class Prefix {
 		if (o == null || getClass() != o.getClass()) return false;
 		Prefix prefix1 = (Prefix) o;
 		return isUnlockable() == prefix1.isUnlockable() && isRetired() == prefix1.isRetired() && getId().equals(
-				prefix1.getId()) && getPrefix().equals(prefix1.getPrefix()) && Objects.equals(getPermission(),
+				prefix1.getId()) && getRawPrefix().equals(prefix1.getRawPrefix()) && Objects.equals(getPermission(),
 																							  prefix1.getPermission()) && Objects.equals(
 				getDescription(), prefix1.getDescription());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getId(), getPrefix(), getPermission(), getDescription(), isUnlockable(), isRetired());
+		return Objects.hash(getId(), getRawPrefix(), getPermission(), getDescription(), isUnlockable(), isRetired());
 	}
 
 	@Override
@@ -105,6 +121,7 @@ public class Prefix {
 				", prefix='" + prefix + '\'' +
 				", permission='" + permission + '\'' +
 				", description='" + description + '\'' +
+				", defaultColour='" + defaultColour.toString() + '\'' +
 				", unlockable=" + unlockable +
 				", retired=" + retired +
 				'}';
@@ -113,13 +130,13 @@ public class Prefix {
 	public Component getListItem(boolean bedrock) {
 		if(bedrock) {
 			if(bedrockListItem == null) {
-				bedrockListItem = createComponent("list-bedrock.item");
+				bedrockListItem = createComponent("prefix-list-bedrock.item");
 			}
 
 			return bedrockListItem;
 		} else {
 			if(listItem == null) {
-				listItem = createComponent("list.item");
+				listItem = createComponent("prefix-list.item");
 			}
 
 			return listItem;
@@ -129,13 +146,13 @@ public class Prefix {
 	public Component getLockedListItem(boolean bedrock) {
 		if(bedrock) {
 			if(bedrockLockedItem == null) {
-				bedrockLockedItem = createComponent("list-bedrock.item-locked");
+				bedrockLockedItem = createComponent("prefix-list-bedrock.item-locked");
 			}
 
 			return bedrockLockedItem;
 		} else {
 			if(lockedItem == null) {
-				lockedItem = createComponent("list.item-locked");
+				lockedItem = createComponent("prefix-list.item-locked");
 			}
 
 			return lockedItem;
@@ -145,13 +162,13 @@ public class Prefix {
 	public Component getSelectedListItem(boolean bedrock) {
 		if(bedrock) {
 			if(bedrockSelectedItem == null) {
-				bedrockSelectedItem = createComponent("list-bedrock.item-selected");
+				bedrockSelectedItem = createComponent("prefix-list-bedrock.item-selected");
 			}
 
 			return bedrockSelectedItem;
 		} else {
 			if(selectedItem == null) {
-				selectedItem = createComponent("list.item-selected");
+				selectedItem = createComponent("prefix-list.item-selected");
 			}
 
 			return selectedItem;
@@ -162,6 +179,6 @@ public class Prefix {
 		return Messages.getComponent(key, Map.of(
 					"id", id,
 					"description", description != null ? description : ""
-			), Collections.singletonMap("prefix", Messages.miniMessage.deserialize(prefix)));
+			), Collections.singletonMap("preview", Messages.miniMessage.deserialize(getPrefix())));
 	}
 }

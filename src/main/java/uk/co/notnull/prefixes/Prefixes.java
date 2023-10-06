@@ -34,11 +34,9 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
@@ -48,6 +46,7 @@ import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 
@@ -59,14 +58,19 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Prefixes {
 	private static Prefixes instance;
 
-	private final Map<String, Prefix> prefixes = new HashMap<>();
+	private Map<String, Prefix> prefixes = new HashMap<>();
+	private Map<String, PrefixColour> colours = new HashMap<>();
 
-	private final Map<UUID, Prefix> currentPrefixes = new HashMap<>();
+	private final Map<UUID, Prefix> currentPrefixes = new ConcurrentHashMap<>();
+	private final Map<UUID, PrefixColour> currentColours = new ConcurrentHashMap<>();
+
+	private final PrefixColour fallbackColour = new PrefixColour("fallback", "<white>");
 
 	@Inject
 	private Logger logger;
@@ -110,14 +114,7 @@ public class Prefixes {
 
 	@Subscribe
 	public void onPlayerConnect(PlayerChooseInitialServerEvent event) {
-		User user = userManager.getUser(event.getPlayer().getUniqueId());
-
-		if (user == null) {
-			logger.warn("Failed to update prefix for " + event.getPlayer().getUsername());
-			return;
-		}
-
-		checkPrefix(user);
+		checkPrefix(event.getPlayer());
 	}
 
 	@Subscribe
@@ -130,31 +127,64 @@ public class Prefixes {
 		loadResource("config.yml");
 		loadResource("messages.yml");
 
-		prefixes.clear();
+		LinkedHashMap<String, Prefix> prefixes = new LinkedHashMap<>();
+		LinkedHashMap<String, PrefixColour> colours = new LinkedHashMap<>();
 
 		try {
 			ConfigurationNode configuration = YAMLConfigurationLoader.builder().setFile(
 					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
 
 			Map<Object, ? extends ConfigurationNode> prefixConfig = configuration.getNode("prefixes").getChildrenMap();
+			Map<Object, ? extends ConfigurationNode> colourConfig = configuration.getNode("colours").getChildrenMap();
+
+			if (!colourConfig.isEmpty()) {
+				colourConfig.forEach((Object id, ConfigurationNode child) -> {
+					String colourStart = child.getNode("start").getString();
+					String colourEnd = child.getNode("end").getString("");
+					String permission = child.getNode("permission").getString();
+					String description = child.getNode("description").getString();
+					boolean unlockable = child.getNode("unlockable").getBoolean(false);
+					boolean retired = child.getNode("retired").getBoolean(false);
+
+					if (colourStart == null) {
+						logger.warn("Ignoring colour " + id + " as it has no defined start");
+						return;
+					}
+
+					colours.put(id.toString(), new PrefixColour(
+							id.toString(), colourStart, colourEnd, permission, description, unlockable, retired));
+				});
+			}
 
 			if (!prefixConfig.isEmpty()) {
 				prefixConfig.forEach((Object id, ConfigurationNode child) -> {
 					String prefix = child.getNode("prefix").getString();
 					String permission = child.getNode("permission").getString();
 					String description = child.getNode("description").getString();
+					String defaultColour = child.getNode("default-colour").getString();
 					boolean unlockable = child.getNode("unlockable").getBoolean(false);
 					boolean retired = child.getNode("retired").getBoolean(false);
 
 					if (prefix == null) {
-						logger.warn("Ignoring " + id + " as it has no defined prefix");
+						logger.warn("Ignoring prefix " + id + " as it has no defined prefix");
 						return;
 					}
 
+					if(defaultColour == null) {
+						logger.warn("Prefix " + id + " has no default colour");
+					} else if (!colours.containsKey(defaultColour)) {
+						logger.warn("Default colour " + defaultColour + " for prefix " + id + " does not exist");
+					}
+
+					PrefixColour colour = colours.getOrDefault(defaultColour, fallbackColour);
+
 					prefixes.put(id.toString(),
-								 new Prefix(id.toString(), prefix, permission, description, unlockable, retired));
+								 new Prefix(id.toString(), prefix, permission, description, colour, unlockable, retired));
 				});
 			}
+
+			this.prefixes = prefixes;
+			this.colours = colours;
 		} catch (IOException e) {
 			logger.error("Error loading config.yml");
 			e.printStackTrace();
@@ -206,10 +236,11 @@ public class Prefixes {
 	 * Applies the given prefix to the given player, updating their luckperms meta and prefix as necessary
 	 *
 	 * @param prefix - The prefix to apply
+	 * @param colour - The prefix colour to apply
 	 * @param player - The player to apply the prefix to
-	 * @return - Completable future indicating wshether applying was successful
+	 * @return - Completable future indicating whether applying was successful
 	 */
-	public CompletableFuture<Boolean> applyPrefix(Prefix prefix, Player player) {
+	public CompletableFuture<Boolean> applyPrefix(Player player, Prefix prefix, PrefixColour colour) {
 		if (prefix.hasPermission() && !player.hasPermission(prefix.getPermission())) {
 			return CompletableFuture.completedFuture(false);
 		}
@@ -220,14 +251,28 @@ public class Prefixes {
 			return CompletableFuture.completedFuture(false);
 		}
 
+		return applyPrefix(user, prefix, colour);
+	}
+
+	/**
+	 * Applies the given prefix to the given luckperms user, updating their meta and prefix
+	 *
+	 * @param prefix - The prefix to apply
+	 * @param colour - The prefix colour to apply
+	 * @param user - The user to apply the prefix to
+	 * @return - Completable future indicating whether applying was successful
+	 */
+	public CompletableFuture<Boolean> applyPrefix(User user, Prefix prefix, PrefixColour colour) {
 		return clearPrefix(user, false).thenCompose(cleared -> {
 			user.data().add(MetaNode.builder("prefix", prefix.getId()).build());
-			user.data().add(PrefixNode.builder(prefix.getPrefix(), 1001).build());
+			user.data().add(MetaNode.builder("prefix-colour", colour.getId()).build());
+			user.data().add(PrefixNode.builder(prefix.getPrefix(colour), 1001).build());
 
 			return saveUser(user);
 		}).thenApply((result) -> {
 			if(result) {
 				currentPrefixes.put(user.getUniqueId(), prefix);
+				currentColours.put(user.getUniqueId(), colour);
 			}
 			return true;
 		});
@@ -261,8 +306,10 @@ public class Prefixes {
 		NodeMap data = user.data();
 
 		for (Node node : nodes) {
-			if (node instanceof MetaNode && ((MetaNode) node).getMetaKey().equals("prefix")) {
-				data.remove(node);
+			if (node instanceof MetaNode metaNode) {
+				if(metaNode.getMetaKey().equals("prefix") || metaNode.getMetaKey().equals("prefix-colour")) {
+					data.remove(node);
+				}
 			}
 
 			if(node instanceof PrefixNode) {
@@ -305,10 +352,32 @@ public class Prefixes {
 		User user = userManager.getUser(player.getUniqueId());
 
 		if (user == null) {
+			logger.warn("Failed to update prefix for " + player.getUsername());
 			return;
 		}
 
-		checkPrefix(user);
+		checkPrefix(user).thenAccept(result -> {
+			if (result == PrefixCheckResult.NO_CHANGE) {
+				return;
+			}
+
+			Prefix prefix = currentPrefixes.compute(player.getUniqueId(), (key, value) -> value);
+			PrefixColour colour = currentColours.compute(player.getUniqueId(), (key, value) -> value);
+
+			switch (result) {
+				case PREFIX_REMOVED -> Messages.sendComponent(player, "notifications.prefix-removed");
+				case COLOUR_REMOVED -> Messages.sendComponent(
+						player, "notifications.colour-removed",
+						Collections.emptyMap(),
+						Collections.singletonMap("preview",
+												 Messages.miniMessage.deserialize(prefix.getPrefix(colour))));
+				case PREFIX_UPDATED -> Messages.sendComponent(
+						player, "notifications.prefix-updated",
+						Collections.emptyMap(),
+						Collections.singletonMap("preview",
+												 Messages.miniMessage.deserialize(prefix.getPrefix(colour))));
+			}
+		});
 	}
 
 	/**
@@ -316,49 +385,75 @@ public class Prefixes {
 	 * Prefixes that don't match the user's set prefix are removed and the correct prefix is added if missing
 	 *
 	 * @param user - The user to check
+	 * @fixme - Remove prefix when user loses permission
 	 */
-	private void checkPrefix(User user) {
+	private CompletableFuture<PrefixCheckResult> checkPrefix(User user) {
 		Collection<Node> nodes = user.getNodes(NodeType.META_OR_CHAT_META);
 		Prefix prefix = null;
+		PrefixColour colour = null;
+
+		var ref = new Object() {
+			PrefixCheckResult result = PrefixCheckResult.NO_CHANGE;
+		};
+
 		boolean prefixFound = false;
-		boolean prefixChanged = false;
+		boolean colourFound = false;
 
+		// Get selected prefix/colour
 		for (Node node : nodes) {
-			if (node instanceof MetaNode && ((MetaNode) node).getMetaKey().equals("prefix")) {
-				prefix = prefixes.get(((MetaNode) node).getMetaValue());
-			}
-		}
-
-		currentPrefixes.remove(user.getUniqueId());
-
-		if (prefix != null) {
-			currentPrefixes.put(user.getUniqueId(), prefix);
-		}
-
-		for (Node node : nodes) {
-			if (node instanceof PrefixNode) {
-				if (prefix == null) {
-					logger.info(
-							"Removing prefix " + ((PrefixNode) node).getMetaValue() + " from " + user.getUsername() + " ");
-					user.getData(DataType.NORMAL).remove(node);
-					prefixChanged = true;
-				} else if (!prefix.getPrefix().equals(((PrefixNode) node).getMetaValue())) {
-					logger.info("Updating prefix " + prefix.getId() + " for " + user.getUsername() + " ");
-					user.getData(DataType.NORMAL).remove(node);
-					prefixChanged = true;
-				} else {
+			if (node instanceof MetaNode metaNode) {
+				if(metaNode.getMetaKey().equals("prefix")) {
+					prefix = prefixes.get(metaNode.getMetaValue());
 					prefixFound = true;
+				}
+
+				if(metaNode.getMetaKey().equals("prefix-colour")) {
+					colour = colours.get(metaNode.getMetaValue());
+					colourFound = true;
 				}
 			}
 		}
 
-		if (!prefixFound && prefix != null) {
-			prefixChanged = true;
-			user.getData(DataType.NORMAL).add(PrefixNode.builder(prefix.getPrefix(), 1001).build());
+		currentPrefixes.remove(user.getUniqueId());
+		currentColours.remove(user.getUniqueId());
+
+		if (colour == null && prefix != null) { // User has invalid colour, or has never selected a colour
+			ref.result = colourFound ? PrefixCheckResult.COLOUR_REMOVED : PrefixCheckResult.PREFIX_UPDATED;
+			colour = prefix.getDefaultColour();
 		}
 
-		if (prefixChanged) {
-			saveUser(user);
+		if (prefix == null && prefixFound) { // User has invalid prefix
+			ref.result = PrefixCheckResult.PREFIX_REMOVED;
+		} else if(prefix != null && ref.result != PrefixCheckResult.COLOUR_REMOVED) { // User has valid prefix, check if update needed
+			for (Node node : nodes) {
+				if (node instanceof PrefixNode) {
+					// Existing prefix that needs to be updated
+					if (!prefix.getPrefix(colour).equals(((PrefixNode) node).getMetaValue())) {
+						ref.result = PrefixCheckResult.PREFIX_UPDATED;
+					}
+				}
+			}
+		}
+
+		logger.info("Prefix check result for " + user.getUsername() + ": " + ref.result);
+
+		if(ref.result == PrefixCheckResult.NO_CHANGE) {
+			if(prefix != null) {
+				currentPrefixes.put(user.getUniqueId(), prefix);
+			}
+
+			if(colour != null) {
+				currentColours.put(user.getUniqueId(), colour);
+			}
+
+			return CompletableFuture.completedFuture(ref.result);
+		}
+
+		// Update prefix if required
+		if (ref.result == PrefixCheckResult.PREFIX_REMOVED) {
+			return clearPrefix(user, true).thenApply(result -> ref.result);
+		} else {
+			return applyPrefix(user, prefix, colour).thenApply((success) -> ref.result);
 		}
 	}
 
@@ -368,7 +463,7 @@ public class Prefixes {
 	 * @param player - The player to send the list to
 	 */
 	void sendPrefixList(Player player, int page) {
-		Prefix currentPrefix = currentPrefixes.get(player.getUniqueId());
+		Prefix currentPrefix = currentPrefixes.compute(player.getUniqueId(), (key, value) -> value);
 		List<Prefix> prefixes = getAllowedPrefixes(player, true);
 
 		boolean bedrock = platformDetectionEnabled && platformDetection.getPlatform(player).isBedrock();
@@ -388,7 +483,7 @@ public class Prefixes {
 			return;
 		}
 
-		Component list = Messages.getComponent("list.header", Map.of(
+		Component list = Messages.getComponent("prefix-list.header", Map.of(
 						"page", String.valueOf(page),
 						"pages", String.valueOf(pages)
 				), Collections.emptyMap())
@@ -397,14 +492,14 @@ public class Prefixes {
 
 		if (page > 1 && !bedrock) {
 			pagination = pagination.append(
-					Messages.getComponent("list.prev",
+					Messages.getComponent("prefix-list.prev",
 										  Collections.singletonMap("page", String.valueOf(page - 1)),
 										  Collections.emptyMap()));
 		}
 
 		if (pages > page) {
 			pagination = pagination.append(Component.space())
-					.append(Messages.getComponent(bedrock ? "list-bedrock.next" : "list.next",
+					.append(Messages.getComponent(bedrock ? "prefix-list-bedrock.next" : "prefix-list.next",
 												  Collections.singletonMap("page", String.valueOf(page + 1)),
 												  Collections.emptyMap()));
 		}
@@ -430,7 +525,96 @@ public class Prefixes {
 			index++;
 		}
 
-		player.sendMessage(list.append(pagination), MessageType.SYSTEM);
+		player.sendMessage(list.append(pagination));
+	}
+
+	/**
+	 * Sends the book-based colour list to the given player if possible
+	 *
+	 * @param player - The player to send the list to
+	 * @param prefix - The prefix to use in colour previews
+	 * @param page - The page of the list to send
+	 */
+	void sendColourList(Player player, @NotNull Prefix prefix, int page) {
+		PrefixColour currentColour = currentColours.compute(player.getUniqueId(), (key, value) -> value);
+		List<PrefixColour> colours = getAllowedColours(player, true).stream()
+				.filter(c -> !c.equals(prefix.getDefaultColour()) && !c.equals(currentColour))
+				.collect(Collectors.toList());
+
+		//Add prefix's default colour to top of list
+		if(!prefix.getDefaultColour().equals(fallbackColour)) {
+			colours.add(0, prefix.getDefaultColour());
+		}
+
+		//Add player's currently selected colour to top of list
+		if(currentColour != null && !currentColour.equals(prefix.getDefaultColour())) {
+			colours.add(0, currentColour);
+		}
+
+		boolean bedrock = platformDetectionEnabled && platformDetection.getPlatform(player).isBedrock();
+		int start = (page - 1) * ITEMS_PER_PAGE;
+		int index = 0;
+		int pages = (int) Math.ceil((float) colours.size() / ITEMS_PER_PAGE);
+
+		if (page > pages) {
+			if (page == 1) {
+				Messages.sendComponent(player, "errors.no-colours");
+			} else {
+				Messages.sendComponent(player, "errors.no-page",
+									   Collections.singletonMap("page", String.valueOf(page)),
+									   Collections.emptyMap());
+			}
+
+			return;
+		}
+
+		Component list = Messages.getComponent("colour-list.header", Map.of(
+						"page", String.valueOf(page),
+						"pages", String.valueOf(pages)
+				), Collections.emptyMap())
+				.append(Component.newline());
+		Component pagination = Component.empty();
+
+		if (page > 1 && !bedrock) {
+			pagination = pagination.append(
+					Messages.getComponent("colour-list.prev",
+										   Map.of(
+														  "page", String.valueOf(page - 1),
+														  "prefix", prefix.getId()),
+										  Collections.emptyMap()));
+		}
+
+		if (pages > page) {
+			pagination = pagination.append(Component.space())
+					.append(Messages.getComponent(bedrock ? "colour-list-bedrock.next" : "colour-list.next",
+												  Map.of(
+														  "page", String.valueOf(page + 1),
+														  "prefix", prefix.getId()),
+												  Collections.emptyMap()));
+		}
+
+		for (PrefixColour colour : colours) {
+			if (index < start) {
+				index++;
+				continue;
+			}
+
+			if (index >= start + ITEMS_PER_PAGE) {
+				break;
+			}
+
+			if (colour.hasPermission() && !player.hasPermission(colour.getPermission())) {
+				list = list.append(colour.getLockedListItem(prefix, bedrock)).append(Component.newline());
+			} else if (colour.equals(currentColour)) {
+				list = list.append(colour.getSelectedListItem(prefix, bedrock)).append(Component.newline());
+			} else {
+				list = list.append(colour.getListItem(prefix, bedrock)).append(Component.newline());
+			}
+
+			index++;
+		}
+
+		player.sendMessage(list.append(pagination));
 	}
 
 	/**
@@ -444,6 +628,26 @@ public class Prefixes {
 	}
 
 	/**
+	 * Gets a player's current prefix
+	 *
+	 * @param player - The player
+	 * @return - The player's prefix, if one is set
+	 */
+	public Prefix getCurrentPrefix(Player player) {
+		return currentPrefixes.compute(player.getUniqueId(), (key, value) -> value);
+	}
+
+	/**
+	 * Gets a colour by its id
+	 *
+	 * @param id - The colour id
+	 * @return - The colour, if one exists
+	 */
+	public PrefixColour getColour(String id) {
+		return colours.get(id);
+	}
+
+	/**
 	 * Returns a list of prefixs the given player is allowed to use, respecting prefix and player permissions
 	 *
 	 * @param player - The player
@@ -454,6 +658,20 @@ public class Prefixes {
 				.filter(p -> (!p.isRetired() || player.hasPermission("prefixes.use-retired"))
 						&& (!p.hasPermission() || (includeLocked && p.isUnlockable()) || player.hasPermission(
 						p.getPermission())))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a list of colours the given player is allowed to use, respecting colour and player permissions
+	 *
+	 * @param player - The player
+	 * @return - List of allowed colours
+	 */
+	public List<PrefixColour> getAllowedColours(Player player, boolean includeLocked) {
+		return colours.values().stream()
+				.filter(c -> (!c.isRetired() || player.hasPermission("prefixes.use-retired"))
+						&& (!c.hasPermission() || (includeLocked && c.isUnlockable()) || player.hasPermission(
+						c.getPermission())))
 				.collect(Collectors.toList());
 	}
 

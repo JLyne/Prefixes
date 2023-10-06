@@ -25,6 +25,7 @@ package uk.co.notnull.prefixes;
 
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,20 +52,15 @@ public final class Command implements SimpleCommand {
 		String arg1 = invocation.arguments()[0];
 
 		switch (arg1) {
-			case "reload":
+			case "reload" -> {
 				Prefixes.getInstance().reload();
 				Messages.sendComponent(invocation.source(), "reload-success");
-
-				return;
-			case "list":
-				handleListCommand(invocation);
-				break;
-			case "set":
-				handleSetCommand(invocation);
-				break;
-			case "clear":
-				handleClearCommand(invocation);
-				break;
+			}
+			case "list" -> handleListCommand(invocation);
+			case "set" -> handleSetCommand(invocation);
+			case "setfor" -> handleSetForCommand(invocation);
+			case "clear" -> handleClearCommand(invocation);
+			case "colours" -> handleColourCommand(invocation);
 		}
 	}
 
@@ -104,7 +100,7 @@ public final class Command implements SimpleCommand {
 
 		Prefix prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[1]);
 
-		if (args == 2 && !(invocation.source() instanceof Player)) {
+		if (!(invocation.source() instanceof Player)) {
 			Messages.sendComponent(invocation.source(), "errors.not-a-player");
 			return;
 		}
@@ -121,52 +117,117 @@ public final class Command implements SimpleCommand {
 			return;
 		}
 
-		if (args == 2) {
-			if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-				Messages.sendComponent(invocation.source(), "errors.no-permission",
+		if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
+			Messages.sendComponent(invocation.source(), "errors.no-prefix-permission",
+								   Collections.singletonMap("prefix", invocation.arguments()[1]),
+								   Collections.emptyMap());
+			return;
+		}
+
+		if(args == 2) {
+			Prefixes.getInstance().sendColourList((Player) invocation.source(), prefix, 1);
+		} else {
+			String colourKey = invocation.arguments()[2];
+			PrefixColour colour = prefix.getDefaultColour();
+
+			if(!colourKey.equals("default")) {
+				colour = Prefixes.getInstance().getColour(invocation.arguments()[2]);
+			}
+
+			if (colour == null) {
+				Messages.sendComponent(invocation.source(), "errors.invalid-colour");
+				return;
+			} else if (prefix.isRetired() && !target.hasPermission("prefixes.use-retired")) {
+				Messages.sendComponent(invocation.source(), "errors.colour-retired",
 									   Collections.singletonMap("prefix", invocation.arguments()[1]),
 									   Collections.emptyMap());
-			} else {
-				Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-					if (success) {
-						Messages.sendComponent(invocation.source(), "set-success",
-											   Collections.emptyMap(),
-											   Collections.singletonMap("prefix",
-																		Messages.miniMessage.deserialize(
-																				prefix.getPrefix())));
-					} else {
-						Messages.sendComponent(invocation.source(), "set-failed");
-					}
-				});
+				return;
 			}
+
+			if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
+				Messages.sendComponent(invocation.source(), "errors.no-colour-permission");
+			}
+
+			Component preview = Messages.miniMessage.deserialize(prefix.getPrefix(colour));
+
+			Prefixes.getInstance().applyPrefix(target, prefix, colour).thenAccept(success -> {
+				if (success) {
+					Messages.sendComponent(invocation.source(), "set-success",
+										   Collections.emptyMap(),
+										   Collections.singletonMap("preview", preview));
+				} else {
+					Messages.sendComponent(invocation.source(), "set-failed");
+				}
+			});
+		}
+	}
+
+	private void handleSetForCommand(final Invocation invocation) {
+		int args = invocation.arguments().length;
+
+		if(args == 1) {
+			Messages.sendComponent(invocation.source(), "errors.unknown-player");
+		} else if (args == 2) {
+			Messages.sendComponent(invocation.source(), "errors.no-prefix");
+			return;
+		} else if (args == 3) {
+			Messages.sendComponent(invocation.source(), "errors.no-colour");
+			return;
+		}
+
+		Player target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[1]).orElse(null);
+		Prefix prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[2]);
+
+		if (prefix == null) {
+			Messages.sendComponent(invocation.source(), "errors.invalid-prefix",
+								   Collections.singletonMap("prefix", invocation.arguments()[2]),
+								   Collections.emptyMap());
+			return;
+		}
+
+		if (target == null) {
+			Messages.sendComponent(invocation.source(), "errors.unknown-player");
+		} else if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
+			Messages.sendComponent(invocation.source(), "errors.other-no-prefix-permission",
+								   Map.of(
+										   "player", target.getUsername(),
+										   "prefix", invocation.arguments()[2]),
+								   Collections.emptyMap());
 		} else {
-			target = Prefixes.getInstance().getProxy().getPlayer(invocation.arguments()[2]).orElse(null);
+			String colourKey = invocation.arguments()[3];
+			PrefixColour colour = prefix.getDefaultColour();
 
-			if (target == null) {
-				Messages.sendComponent(invocation.source(), "errors.unknown-player");
-			} else if (prefix.hasPermission() && !target.hasPermission(prefix.getPermission())) {
-				Messages.sendComponent(invocation.source(), "errors.other-no-permission",
-									   Map.of(
-											   "player", target.getUsername(),
-											   "prefix", invocation.arguments()[0]),
-									   Collections.emptyMap());
-			} else {
-				Player finalTarget = target;
-
-				Prefixes.getInstance().applyPrefix(prefix, target).thenAccept(success -> {
-					if (success) {
-						Messages.sendComponent(invocation.source(), "other-set-success",
-											   Collections.singletonMap("player", finalTarget.getUsername()),
-											   Collections.singletonMap("prefix",
-																		Messages.miniMessage.deserialize(
-																				prefix.getPrefix())));
-					} else {
-						Messages.sendComponent(invocation.source(), "other-set-failed",
-											   Collections.singletonMap("player", finalTarget.getUsername()),
-											   Collections.emptyMap());
-					}
-				});
+			if(!colourKey.equals("default")) {
+				colour = Prefixes.getInstance().getColour(invocation.arguments()[3]);
 			}
+
+			if (colour == null) {
+				Messages.sendComponent(invocation.source(), "errors.invalid-colour");
+				return;
+			} else if (colour.isRetired() && !target.hasPermission("prefixes.use-retired")) {
+				Messages.sendComponent(invocation.source(), "errors.colour-retired",
+									   Collections.singletonMap("prefix", invocation.arguments()[2]),
+									   Collections.emptyMap());
+				return;
+			}
+
+			if (colour.hasPermission() && !target.hasPermission(colour.getPermission())) {
+				Messages.sendComponent(invocation.source(), "errors.no-colour-permission");
+			}
+
+			Component preview = Messages.miniMessage.deserialize(prefix.getPrefix(colour));
+
+			Prefixes.getInstance().applyPrefix(target, prefix, colour).thenAccept(success -> {
+				if (success) {
+					Messages.sendComponent(invocation.source(), "other-set-success",
+										   Collections.singletonMap("player", target.getUsername()),
+										   Collections.singletonMap("preview", preview));
+				} else {
+					Messages.sendComponent(invocation.source(), "other-set-failed",
+										   Collections.singletonMap("player", target.getUsername()),
+										   Collections.emptyMap());
+				}
+			});
 		}
 	}
 
@@ -209,11 +270,60 @@ public final class Command implements SimpleCommand {
 		}
 	}
 
+	private void handleColourCommand(final Invocation invocation) {
+		int args = invocation.arguments().length;
+
+		if (!(invocation.source() instanceof Player player)) {
+			Messages.sendComponent(invocation.source(), "errors.not-a-player");
+			return;
+		}
+
+		// Default to player's current prefix
+		Prefix prefix = Prefixes.getInstance().getCurrentPrefix(player);
+
+		if(args > 1) { // Player specified prefix as argument
+			prefix = Prefixes.getInstance().getPrefix(invocation.arguments()[1]);
+
+			if (prefix == null) {
+				Messages.sendComponent(invocation.source(), "errors.invalid-prefix",
+									   Collections.singletonMap("prefix", invocation.arguments()[1]),
+									   Collections.emptyMap());
+				return;
+			}
+
+			if (prefix.hasPermission() && !player.hasPermission(prefix.getPermission())) {
+				Messages.sendComponent(invocation.source(), "errors.no-prefix-permission",
+									   Collections.singletonMap("prefix", prefix.getId()),
+									   Collections.emptyMap());
+				return;
+			}
+		} else if (prefix == null) { // Player hasn't set a prefix
+			Messages.sendComponent(invocation.source(), "errors.no-prefix-set");
+			return;
+		}
+
+		if (args < 3) {
+			Prefixes.getInstance().sendColourList((Player) invocation.source(), prefix, 1);
+		} else {
+			try {
+				int page = Integer.parseInt(invocation.arguments()[2]);
+
+				if(page < 1) {
+					Messages.sendComponent(invocation.source(), "errors.invalid-page");
+				} else {
+					Prefixes.getInstance().sendColourList((Player) invocation.source(), prefix, page);
+				}
+			} catch (NumberFormatException e) {
+				Messages.sendComponent(invocation.source(), "errors.invalid-page");
+			}
+		}
+	}
+
 	@Override
 	public boolean hasPermission(final Invocation invocation) {
 		if (invocation.arguments().length > 0 && invocation.arguments()[0].equals("reload")) {
 			return invocation.source().hasPermission("prefixes.reload");
-		} else if (invocation.arguments().length >= 3 && invocation.arguments()[0].equals("set")) {
+		} else if (invocation.arguments().length > 0 && invocation.arguments()[0].equals("setfor")) {
 			return invocation.source().hasPermission("prefixes.change-others");
 		} else if (invocation.arguments().length >= 2 && invocation.arguments()[0].equals("clear")) {
 			return invocation.source().hasPermission("prefixes.change-others");
@@ -228,42 +338,82 @@ public final class Command implements SimpleCommand {
 			return invocation.arguments().length <= 1 ? Collections.singletonList("reload") : Collections.emptyList();
 		}
 
-		if (invocation.arguments().length <= 1) {
+		int args = invocation.arguments().length;
+
+		if (args <= 1) {
 			List<String> options = new ArrayList<>();
 
 			if (invocation.source().hasPermission("prefixes.reload")) {
 				options.add("reload");
 			}
 
+			if (invocation.source().hasPermission("prefixes.change-others")) {
+				options.add("setfor");
+			}
+
 			options.add("set");
 			options.add("clear");
 			options.add("list");
+			options.add("colours");
 
 			return options.stream()
-					.filter(o -> invocation.arguments().length == 0 || o.startsWith(invocation.arguments()[0]))
+					.filter(o -> args == 0 || o.startsWith(invocation.arguments()[0].toLowerCase()))
 					.collect(Collectors.toList());
 		}
 
 		if (invocation.arguments()[0].equals("set")) {
-			if (invocation.arguments().length == 2) {
+			if (args == 2) {
 				return Prefixes.getInstance()
 						.getAllowedPrefixes((Player) invocation.source(), false)
 						.stream().map(Prefix::getId)
-						.filter(id -> invocation.arguments().length == 1 || id.startsWith(invocation.arguments()[1]))
+						.filter(id -> id.toLowerCase().startsWith(invocation.arguments()[1].toLowerCase()))
 						.collect(Collectors.toList());
-			} else if (invocation.arguments().length == 3
-					&& invocation.source().hasPermission("prefixes.change-others")) {
-				return Prefixes.getInstance().getProxy().getAllPlayers()
-						.stream().map(Player::getUsername).filter(name -> name.startsWith(invocation.arguments()[2]))
+			} else if (args == 3) {
+				return Prefixes.getInstance()
+						.getAllowedColours((Player) invocation.source(), false)
+						.stream().map(PrefixColour::getId)
+						.filter(id -> id.toLowerCase().startsWith(invocation.arguments()[2].toLowerCase()))
 						.collect(Collectors.toList());
 			}
 		}
 
-		if(invocation.arguments()[0].equals("clear") && invocation.arguments().length == 2
+		if (invocation.arguments()[0].equals("setfor") && invocation.source().hasPermission("prefixes.change-others")) {
+			if(args == 2) {
+				return Prefixes.getInstance().getProxy().getAllPlayers()
+						.stream().map(Player::getUsername)
+						.filter(name -> name.toLowerCase().startsWith(invocation.arguments()[1].toLowerCase()))
+						.collect(Collectors.toList());
+			} else if (args == 3) {
+				return Prefixes.getInstance()
+						.getAllowedPrefixes((Player) invocation.source(), false)
+						.stream().map(Prefix::getId)
+						.filter(id -> id.toLowerCase().startsWith(invocation.arguments()[2].toLowerCase()))
+						.collect(Collectors.toList());
+			} else if (args == 4) {
+				return Prefixes.getInstance()
+						.getAllowedColours((Player) invocation.source(), false)
+						.stream().map(PrefixColour::getId)
+						.filter(id -> id.toLowerCase().startsWith(invocation.arguments()[3].toLowerCase()))
+						.collect(Collectors.toList());
+			}
+		}
+
+		if(invocation.arguments()[0].equals("clear") && args == 2
 			&& invocation.source().hasPermission("prefixes.change-others")) {
 			return Prefixes.getInstance().getProxy().getAllPlayers()
-						.stream().map(Player::getUsername).filter(name -> name.startsWith(invocation.arguments()[1]))
+					.stream().map(Player::getUsername)
+					.filter(name -> name.toLowerCase().startsWith(invocation.arguments()[1].toLowerCase()))
+					.collect(Collectors.toList());
+		}
+
+		if (invocation.arguments()[0].equals("colours")) {
+			if (args == 2) {
+				return Prefixes.getInstance()
+						.getAllowedPrefixes((Player) invocation.source(), false)
+						.stream().map(Prefix::getId)
+						.filter(id -> id.toLowerCase().startsWith(invocation.arguments()[1].toLowerCase()))
 						.collect(Collectors.toList());
+			}
 		}
 
 		return Collections.emptyList();
