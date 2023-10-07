@@ -424,11 +424,13 @@ public class Prefixes {
 
 		if (prefix == null && prefixFound) { // User has invalid prefix
 			ref.result = PrefixCheckResult.PREFIX_REMOVED;
-		} else if(prefix != null && ref.result != PrefixCheckResult.COLOUR_REMOVED) { // User has valid prefix, check if update needed
+		} else if(ref.result != PrefixCheckResult.COLOUR_REMOVED) { // Check if any existing prefix needs updating
 			for (Node node : nodes) {
 				if (node instanceof PrefixNode) {
 					// Existing prefix that needs to be updated
-					if (!prefix.getPrefix(colour).equals(((PrefixNode) node).getMetaValue())) {
+					if(prefix == null) {
+						ref.result = PrefixCheckResult.PREFIX_REMOVED;
+					} else if (!prefix.getPrefix(colour).equals(((PrefixNode) node).getMetaValue())) {
 						ref.result = PrefixCheckResult.PREFIX_UPDATED;
 					}
 				}
