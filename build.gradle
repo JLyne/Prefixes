@@ -8,16 +8,20 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    // Adventure-bom snapshots required for velocity 3.3.0
+    maven {
+        url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+    }
     maven { url "https://repo.not-null.co.uk/releases/" }
     maven { url "https://papermc.io/repo/repository/maven-public/" }
 }
 
 dependencies {
     compileOnly 'net.luckperms:api:5.4'
-    compileOnly 'com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'
-    compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.1'
+    compileOnly 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
+    compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.2'
 
-    annotationProcessor 'com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
 }
 
 group = 'uk.co.notnull'
