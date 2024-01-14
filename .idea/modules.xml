@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Prefixes.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Prefixes.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uk.co.notnull.Prefixes.main.iml" filepath="$PROJECT_DIR$/.idea/modules/uk.co.notnull.Prefixes.main.iml" />
     </modules>
   </component>
 </project>
