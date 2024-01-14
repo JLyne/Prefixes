@@ -44,8 +44,8 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
@@ -131,20 +131,20 @@ public class Prefixes {
 		LinkedHashMap<String, PrefixColour> colours = new LinkedHashMap<>();
 
 		try {
-			ConfigurationNode configuration = YAMLConfigurationLoader.builder().setFile(
+			ConfigurationNode configuration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
 
-			Map<Object, ? extends ConfigurationNode> prefixConfig = configuration.getNode("prefixes").getChildrenMap();
-			Map<Object, ? extends ConfigurationNode> colourConfig = configuration.getNode("colours").getChildrenMap();
+			Map<Object, ? extends ConfigurationNode> prefixConfig = configuration.node("prefixes").childrenMap();
+			Map<Object, ? extends ConfigurationNode> colourConfig = configuration.node("colours").childrenMap();
 
 			if (!colourConfig.isEmpty()) {
 				colourConfig.forEach((Object id, ConfigurationNode child) -> {
-					String colourStart = child.getNode("start").getString();
-					String colourEnd = child.getNode("end").getString("");
-					String permission = child.getNode("permission").getString();
-					String description = child.getNode("description").getString();
-					boolean unlockable = child.getNode("unlockable").getBoolean(false);
-					boolean retired = child.getNode("retired").getBoolean(false);
+					String colourStart = child.node("start").getString();
+					String colourEnd = child.node("end").getString("");
+					String permission = child.node("permission").getString();
+					String description = child.node("description").getString();
+					boolean unlockable = child.node("unlockable").getBoolean(false);
+					boolean retired = child.node("retired").getBoolean(false);
 
 					if (colourStart == null) {
 						logger.warn("Ignoring colour " + id + " as it has no defined start");
@@ -158,12 +158,12 @@ public class Prefixes {
 
 			if (!prefixConfig.isEmpty()) {
 				prefixConfig.forEach((Object id, ConfigurationNode child) -> {
-					String prefix = child.getNode("prefix").getString();
-					String permission = child.getNode("permission").getString();
-					String description = child.getNode("description").getString();
-					String defaultColour = child.getNode("default-colour").getString();
-					boolean unlockable = child.getNode("unlockable").getBoolean(false);
-					boolean retired = child.getNode("retired").getBoolean(false);
+					String prefix = child.node("prefix").getString();
+					String permission = child.node("permission").getString();
+					String description = child.node("description").getString();
+					String defaultColour = child.node("default-colour").getString();
+					boolean unlockable = child.node("unlockable").getBoolean(false);
+					boolean retired = child.node("retired").getBoolean(false);
 
 					if (prefix == null) {
 						logger.warn("Ignoring prefix " + id + " as it has no defined prefix");
@@ -195,7 +195,7 @@ public class Prefixes {
 		ConfigurationNode messagesConfiguration;
 
 		try {
-			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
+			messagesConfiguration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
 			Messages.set(messagesConfiguration);
 		} catch (IOException e) {
