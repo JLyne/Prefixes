@@ -1,0 +1,12 @@
+[versions]
+pluginYmlPaper = "0.7.1"
+velocity = "3.4.0-SNAPSHOT"
+luckperms = "5.4"
+platformDetection = "2.2"
+
+[libraries]
+velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+luckpermsApi = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
+platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocity", version.ref = "platformDetection" }
+
+[plugins]

@@ -1,7 +1,7 @@
 {
   "id": "prefixes",
   "name": "Prefixes",
-  "version": "@project.version@",
+  "version": "${version}",
   "authors": ["Jim (AnEnragedPigeon)"],
   "dependencies": [
     {
