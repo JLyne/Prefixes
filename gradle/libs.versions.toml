@@ -1,7 +1,6 @@
 [versions]
-pluginYmlPaper = "0.7.1"
 velocity = "3.4.0-SNAPSHOT"
-luckperms = "5.4"
+luckperms = "5.5"
 platformDetection = "2.2"
 
 [libraries]

@@ -12,13 +12,14 @@ java {
 }
 
 repositories {
-    mavenCentral()
     maven {
         url = uri("https://repo.not-null.co.uk/releases/")
     }
     maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
